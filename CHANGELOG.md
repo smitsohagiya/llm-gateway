@@ -6,6 +6,8 @@ and the project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-19
+
 ### Added
 
 - OpenAI-compatible `/v1/chat/completions` with JSON and SSE streaming, plus `/v1/models`, `/v1/usage`, `/metrics` and `/health`.
