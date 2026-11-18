@@ -1,0 +1,26 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint
+        entry: pnpm exec eslint --fix
+        language: system
+        types_or: [ts, javascript]
+      - id: prettier
+        name: prettier
+        entry: pnpm exec prettier --write --ignore-unknown
+        language: system
+        types: [text]
+      - id: typecheck
+        name: tsc
+        entry: pnpm typecheck
+        language: system
+        types_or: [ts]
+        pass_filenames: false
