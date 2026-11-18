@@ -45,7 +45,28 @@ curl localhost:3000/v1/chat/completions \
   -d '{"model": "demo", "messages": [{"role": "user", "content": "hello"}]}'
 ```
 
-The `demo` route's first target (`mock:flaky`) always fails, so you can watch the retry and the fallback to `mock:echo` in the response headers and the metrics.
+The `demo` route's first target (`mock:flaky`) always fails, so you can watch the retry and the fallback. This is real output from the Docker image:
+
+```console
+$ curl -s -D - localhost:3000/v1/chat/completions -H "Authorization: Bearer demo-key" \
+    -H "content-type: application/json" \
+    -d '{"model":"demo","temperature":0,"messages":[{"role":"user","content":"Summarise our refund policy"}]}'
+x-gateway-target: mock:echo
+x-gateway-attempts: 3        # mock:flaky failed twice (1 retry), then the fallback answered
+x-cache: miss
+{"object":"chat.completion","model":"demo","choices":[{"index":0,"message":{"role":"assistant",
+ "content":"Echo: Summarise our refund policy"},"finish_reason":"stop"}],"usage":{"prompt_tokens":4,...}}
+
+$ # the same request again
+x-gateway-attempts: 0
+x-cache: hit
+
+$ curl -s localhost:3000/metrics | grep ^gateway_
+gateway_requests_total{route="demo",target="mock:flaky",status="error"} 3
+gateway_requests_total{route="demo",target="mock:echo",status="ok"} 2
+gateway_cache_hits_total{route="demo"} 1
+gateway_fallbacks_total{route="demo",from="mock:flaky"} 2
+```
 
 With real providers, set any of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY` or `OLLAMA_BASE_URL` (for example `http://localhost:11434/v1`), then use the `fast`, `smart` or `local` routes. From Python:
 
