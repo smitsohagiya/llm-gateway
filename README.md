@@ -6,7 +6,7 @@ One OpenAI-compatible endpoint in front of OpenAI, Anthropic, Gemini and local m
 
 ## Why
 
-Every team that ships LLM features ends up writing the same plumbing: switch models without touching app code, survive a provider outage, stop one team from spending the month's budget in a day, and see what each feature costs. On the healthcare AI product I lead at work, this layer routes cheap models to extraction and stronger ones to scoring, with token budgets per facility. This repo is a clean, open version of that design.
+Every team that ships LLM features ends up writing the same plumbing: switch models without touching app code, survive a provider outage, stop one team from spending the month's budget in a day, and see what each feature costs. This gateway puts that plumbing in one small service that any OpenAI SDK can talk to.
 
 ## How it works
 
