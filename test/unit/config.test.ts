@@ -6,29 +6,32 @@ import { ResponseCache } from "../../src/gateway/cache.js";
 import { createProviders } from "../../src/providers/index.js";
 
 describe("gateway config", () => {
-  it("loads the example and reads secrets from the environment", () => {
-    const config = loadGatewayConfig("config/gateway.example.json", {
-      GATEWAY_KEY_TEAM_A: "team-secret",
-    });
-    expect(config.tenants.map((t) => t.apiKey)).toEqual(["demo-key", "team-secret"]);
+  const raw = {
+    tenants: [
+      { name: "demo", apiKey: "demo-key", dailyTokenBudget: 10 },
+      { name: "team-a", apiKey: "env:GATEWAY_KEY_TEAM_A", dailyTokenBudget: 10 },
+    ],
+    routes: { x: ["mock:echo"] },
+  };
+
+  it("loads the example config with no extra environment", () => {
+    const config = loadGatewayConfig("config/gateway.example.json", {});
+    expect(config.tenants.map((t) => t.apiKey)).toEqual(["demo-key"]);
     expect(config.routes.demo).toEqual(["mock:flaky", "mock:echo"]);
   });
 
-  it("fails clearly when a referenced secret is missing", () => {
-    expect(() => loadGatewayConfig("config/gateway.example.json", {})).toThrow(
-      "GATEWAY_KEY_TEAM_A is not set",
-    );
+  it("reads env: secrets from the environment and fails clearly when one is missing", () => {
+    const config = parseGatewayConfig(raw, { GATEWAY_KEY_TEAM_A: "team-secret" });
+    expect(config.tenants.map((t) => t.apiKey)).toEqual(["demo-key", "team-secret"]);
+    expect(() => parseGatewayConfig(raw, {})).toThrow("GATEWAY_KEY_TEAM_A is not set");
   });
 
   it("validates targets and fills defaults", () => {
     expect(() =>
-      parseGatewayConfig({
-        tenants: [{ name: "a", apiKey: "k", dailyTokenBudget: 1 }],
-        routes: { x: ["nocolon"] },
-      }),
+      parseGatewayConfig({ tenants: raw.tenants.slice(0, 1), routes: { x: ["nocolon"] } }),
     ).toThrow("Invalid gateway config");
     const config = parseGatewayConfig({
-      tenants: [{ name: "a", apiKey: "k", dailyTokenBudget: 1 }],
+      tenants: raw.tenants.slice(0, 1),
       routes: { x: ["mock:echo"] },
     });
     expect(config.cache).toEqual({ ttlSeconds: 300, maxEntries: 1000 });
