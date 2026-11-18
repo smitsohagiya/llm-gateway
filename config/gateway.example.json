@@ -1,0 +1,22 @@
+{
+  "tenants": [
+    { "name": "demo", "apiKey": "demo-key", "dailyTokenBudget": 100000 },
+    { "name": "team-a", "apiKey": "env:GATEWAY_KEY_TEAM_A", "dailyTokenBudget": 2000000 }
+  ],
+  "routes": {
+    "demo": ["mock:flaky", "mock:echo"],
+    "local": ["ollama:qwen2.5:3b", "mock:echo"],
+    "fast": ["openai:gpt-4o-mini", "gemini:gemini-2.0-flash", "mock:echo"],
+    "smart": ["anthropic:claude-sonnet-4-5", "openai:gpt-4o"]
+  },
+  "prices": {
+    "openai:gpt-4o-mini": { "input": 0.15, "output": 0.6 },
+    "openai:gpt-4o": { "input": 2.5, "output": 10 },
+    "gemini:gemini-2.0-flash": { "input": 0.1, "output": 0.4 },
+    "anthropic:claude-sonnet-4-5": { "input": 3, "output": 15 }
+  },
+  "timeoutMs": 30000,
+  "retries": 1,
+  "cache": { "ttlSeconds": 300, "maxEntries": 1000 },
+  "circuitBreaker": { "failureThreshold": 3, "cooldownMs": 30000 }
+}
