@@ -4,6 +4,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # Types follow the Node major we run (22), so they move with the runtime, not on their own.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -12,3 +16,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # A new Node major changes CI, the image and @types/node together, so it's done by hand.
+      # (Node 25 and later also drop corepack, which the Dockerfile uses.)
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
